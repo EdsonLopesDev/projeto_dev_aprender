@@ -1,0 +1,15 @@
+--Inativar
+
+--buscar ids
+select pi.sku_id, pi.id as id_produto_integracao
+from usrapiecomm.ProdutoIntegracao pi
+inner join consinco.map_produto c on c.seqproduto = pi.sku_id
+where c.indintegraecommerce = 'N'
+
+--ver ultimo comando
+select ps.comando as ult_comando, ps.status as ult_status
+from usrapiecomm.ProdutoSincronizacao ps
+where ps.produto_integracao_id = ?
+and   ps.data_criacao = (select max(ps1.data_criacao) from usrapiecomm.ProdutoSincronizacao ps1 where ps.produto_integracao_id = ps1.produto_integracao_id)
+
+--se ultimo comando for INATIVAR, não faz nada, senão insere na tabela ProdutoSincronizacao

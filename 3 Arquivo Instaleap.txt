@@ -1,0 +1,26 @@
+select distinct 
+        case 
+          when e.codsistemaafv = 88 then 'Instaleap' end as origem
+       , p.nrocgccpf || p.digcgccpf as cpf
+       , p.nomerazao as nome
+       , e.nroempresa as loja
+       , e.nropedidoafv as afv
+       , e.seqedipedvenda as seqpedido
+       , e.nropedvenda as nropedvenda
+       , e.dtainclusao as datapedido              
+       , case e.STATUSPEDIDO
+        when 'R' then 'Roteirização'
+        when 'F' then 'Faturado'
+        when 'L' then 'Liberado'
+        end as STATUSPEDIDO
+       , nvl((SELECT CONSINCO.fn_get_total_selos(e.nropedvenda,e.NROEMPRESA) QTD_SELOS from dual),0) as QTD_SELOS
+       , round(sum(ei.Qtdpedida*ei.Vlrembinformado),2) as valor_total_pedido
+       , nvl(round(e.VLRTOTFRETE),0) valor_acrescimo
+from consinco.edi_pedvenda e
+join consinco.ge_pessoa p on p.seqpessoa = e.seqpessoa
+INNER JOIN consinco.edi_pedvendaitem ei ON ei.seqedipedvenda=e.seqedipedvenda
+where 1 = 1
+and   e.codsistemaafv = 88
+--and   e.nropedidoafv = 123
+and   e.dtainclusao >= sysdate -15
+group by e.codsistemaafv, p.nrocgccpf, p.digcgccpf,p.nomerazao, e.nroempresa,e.nropedidoafv,e.seqedipedvenda,e.nropedvenda,e.dtainclusao,e.STATUSPEDIDO,e.VLRTOTFRETE
